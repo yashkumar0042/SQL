@@ -1,11 +1,11 @@
 resource "google_compute_network" "vpc" {
-  name          =  "${format("%s","${var.company}-${var.env}-vpc")}"
+  name                    = format("%s", "${var.company}-${var.env}-vpc")
   auto_create_subnetworks = "false"
   routing_mode            = "GLOBAL"
 }
 resource "google_compute_firewall" "allow-internal" {
   name    = "${var.company}-fw-allow-internal"
-  network = "${google_compute_network.vpc.name}"
+  network = google_compute_network.vpc.name
   allow {
     protocol = "icmp"
   }
@@ -26,19 +26,21 @@ resource "google_compute_firewall" "allow-internal" {
 }
 resource "google_compute_firewall" "allow-http" {
   name    = "${var.company}-fw-allow-http"
-  network = "${google_compute_network.vpc.name}"
-allow {
+  network = google_compute_network.vpc.name
+  allow {
     protocol = "tcp"
     ports    = ["80"]
   }
-  target_tags = ["http"] 
+  target_tags = ["http"]
+  source_ranges = ["0.0.0.0/0"]
 }
 resource "google_compute_firewall" "allow-bastion" {
   name    = "${var.company}-fw-allow-bastion"
-  network = "${google_compute_network.vpc.name}"
+  network = google_compute_network.vpc.name
   allow {
     protocol = "tcp"
     ports    = ["22"]
   }
   target_tags = ["ssh"]
-  }
+  source_ranges = ["bastian"]
+}
